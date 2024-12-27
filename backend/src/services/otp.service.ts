@@ -23,16 +23,18 @@ export const create = async (
 };
 
 export const findById = async (
-  id: StringOrObjectId, channel?: EOtpChannel
+  id: StringOrObjectId,
+  channel?: EOtpChannel,
   { Otp = TokenModel } = {}
 ) => {
   const error = createServiceError("Otp not found", "OTP_NOT_FOUND_ERROR");
 
-  const otp = await Otp.findById(id, {}, { sort: { createdAt: -1 } }).error(
-    error
-  );
+  const otp = await Otp.findOne({
+    _id: id,
+    ...(channel && { channel }),
+  }).orFail(error);
 
-  return otp!.toObject();
+  return otp.toObject();
 };
 
 export const findByEmail = async (
@@ -41,7 +43,7 @@ export const findByEmail = async (
 ) => {
   const error = createServiceError("Otp not found", "OTP_NOT_FOUND_ERROR");
 
-  const otp = await Otp.findById(id, {}, { sort: { createdAt: -1 } }).error(
+  const otp = await Otp.findById(id, {}, { sort: { createdAt: -1 } }).orFail(
     error
   );
 
@@ -74,7 +76,6 @@ export const updateStatus = async (
   const otp = await Otp.findOneAndUpdate(
     {
       _id: id,
-      status: EOtpStatus.PENDING,
     },
     { status },
     { new: true }

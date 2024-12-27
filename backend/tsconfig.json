@@ -12,7 +12,7 @@
     "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
     /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": false /* Skip type checking all .d.ts files. */,
-    "typeRoots": ["./src/typings"]
+    "typeRoots": ["./src/typings/**/*.ts", "./node_modules/typings/**/*.ts"]
   },
   "include": ["src/**/*.ts", "types"],
   "exclude": ["node_modules", "/dist"]

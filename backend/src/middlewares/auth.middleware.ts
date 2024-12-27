@@ -3,7 +3,8 @@ import * as hashUtils from "../utils/hash.utils";
 import { StatusCodes } from "http-status-codes";
 import { createRequestError, createServiceError } from "../utils/error.utils";
 import getEnv from "../config/env.config";
-import { ERole } from "../interfaces/user.interface";
+import { ERole, EUserStatus } from "../interfaces/user.interface";
+import * as userService from "../services/user.service";
 
 const { JWT_ADMIN_SECRET } = getEnv();
 
@@ -29,10 +30,7 @@ export const isAuthenticatedAdmin =
       });
 
       if (!decodedToken || decodedToken.role !== ERole.ADMIN) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-          status: "error",
-          message: "Unauthorized",
-        });
+        throw createServiceError("Not Authorized", "INVALID_TOKEN_ERROR");
       }
 
       req.jwtUser = {
@@ -75,10 +73,7 @@ export const isAuthenticatedUser =
       const decodedToken = decodeToken(token);
 
       if (!decodedToken || decodedToken.role !== ERole.USER) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-          status: "error",
-          message: "Unauthorized",
-        });
+        throw createServiceError("Not Authorized", "INVALID_TOKEN_ERROR");
       }
 
       req.jwtUser = {
@@ -97,6 +92,37 @@ export const isAuthenticatedUser =
       next(
         createRequestError(
           (error as Error).message || "Not authorized",
+          (error as Error).name,
+          errMap[(error as Error).name]
+        )
+      );
+    }
+  };
+
+export const isActiveUser =
+  ({ getUser = userService.findByEmail } = {}) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body;
+
+      const { status } = await getUser(email);
+
+      if (status !== EUserStatus.ACTIVE) {
+        throw createServiceError(
+          "Please verify your email",
+          "VERIFY_EMAIL_ERROR"
+        );
+      }
+
+      next();
+    } catch (error) {
+      const errMap: Record<string, StatusCodes> = {
+        VERIFY_EMAIL_ERROR: StatusCodes.PRECONDITION_FAILED,
+      };
+
+      next(
+        createRequestError(
+          (error as Error).message,
           (error as Error).name,
           errMap[(error as Error).name]
         )

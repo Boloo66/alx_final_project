@@ -19,6 +19,9 @@ const getEnv = (env = process.env) =>
     EMAIL_PASSWORD: z.string(),
     EMAIL_HOST: z.string(),
     EMAIL_PORT: z.coerce.number().default(587),
+    CLOUDINARY_CLOUD_NAME: z.string(),
+    CLOUDINARY_API_KEY: z.string(),
+    CLOUDINARY_API_SECRET_KEY: z.string(),
   });
 
 export default getEnv;

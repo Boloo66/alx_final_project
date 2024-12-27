@@ -10,7 +10,7 @@ export const verifyBearerToken = (
   { verify = jwt.verify, secret = JWT_SECRET } = {}
 ) => {
   try {
-    return verify(token, secret) as IJwtPayload;
+    return verify(token, secret, { algorithms: ["HS256"] }) as IJwtPayload;
   } catch (error) {
     return null;
   }

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import * as userService from "../services/user.service";
 import { StatusCodes } from "http-status-codes";
 import { createRequestError } from "../utils/error.utils";
-import { ERole } from "../interfaces/user.interface";
+import { ERole, EUserStatus } from "../interfaces/user.interface";
 import * as hashUtils from "../utils/hash.utils";
 import * as otpUtils from "../utils/otp.utils";
 import * as otpService from "../services/otp.service";
@@ -13,6 +13,7 @@ import loadHtmlTemplate from "../emails";
 import generateFrontendUrl from "../utils";
 import path from "path";
 import { Mailer } from "../utils/mail.utils";
+import { StringOrObjectId } from "../models/base.model";
 
 export const handleRegisterUser =
   (
@@ -124,17 +125,20 @@ export const handleVerifyRegCode =
       if (blockUser) {
         await blockUserById(userId);
 
-        return res.status(StatusCodes.FORBIDDEN).json({
+        res.status(StatusCodes.FORBIDDEN).json({
           status: "error",
+          sessionId: "",
           message:
             "User has been blocked due to too many failed login attempts",
         });
       }
 
       await updateOtpStatus(id, EOtpStatus.CONFIRMED);
-      return res.json({
+
+      res.json({
         status: "success",
         sessionId: id,
+        message: "Procees to complete registration",
       });
     } catch (error) {
       const errMap: Record<string, StatusCodes> = {
@@ -159,16 +163,24 @@ export const handleCompleteReg =
     findOtpById = otpService.findById,
     markOtpAsUsed = otpService.updateStatus,
     verifyStatus = otpService.ensureStatusMatches,
+    updateUser = userService.updateByEmail,
   } = {}) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.body;
+      const id = req.query.id as StringOrObjectId;
 
-      const { status } = await findOtpById(id, EOtpChannel.REGISTRATION);
+      console.log(id);
+
+      const { status, email } = await findOtpById(id, EOtpChannel.REGISTRATION);
+      console.log(status);
 
       verifyStatus(status, EOtpStatus.CONFIRMED);
 
       await markOtpAsUsed(id, EOtpStatus.USED);
+
+      await updateUser(email, {
+        $set: { status: EUserStatus.ACTIVE },
+      });
 
       res.json({
         status: "success",
@@ -281,6 +293,7 @@ export const handleAdminLogin =
           expiresIn: payload.expiresIn,
           name: user.name,
           email,
+          id: user.id,
         },
       });
     } catch (error) {}
@@ -307,7 +320,7 @@ export const handleUserLogin =
         role: user.role,
         expiresIn: "24h",
       };
-      const { JWT_ADMIN_SECRET: secret } = getEnv();
+      const { JWT_SECRET: secret } = getEnv();
 
       const token = createToken(payload, { secret });
 
@@ -320,6 +333,7 @@ export const handleUserLogin =
           expiresIn: payload.expiresIn,
           name: user.name,
           email,
+          id: user.id,
         },
       });
     } catch (error) {
@@ -360,6 +374,7 @@ export const handleUserResetPassword =
           password: await hashPassword(password),
         },
       });
+
       await markOtpAsUsed(otpId, EOtpStatus.USED);
 
       res.json({
@@ -375,6 +390,76 @@ export const handleUserResetPassword =
           (error as Error).message || "Session is invalid or expired",
           (error as Error).name,
           errMap[(error as Error).name] || StatusCodes.INTERNAL_SERVER_ERROR
+        )
+      );
+    }
+  };
+
+export const handleRequestNewCode =
+  (
+    channelIsRegistration: boolean = true,
+    {
+      getUserByEmail = userService.findByEmail,
+      createOtp = otpService.create,
+      generateOtp = otpUtils.generateRandomCode,
+      generateUrl = generateFrontendUrl,
+      loademplate = loadHtmlTemplate,
+      hashCode = hashUtils.createHash,
+    } = {}
+  ) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, redirectPath } = req.body;
+
+      const channel = channelIsRegistration
+        ? EOtpChannel.REGISTRATION
+        : EOtpChannel.RESET;
+
+      const { id: userId, name } = await getUserByEmail(email);
+
+      const code = generateOtp();
+
+      const otpData: IOtpBase = {
+        userId,
+        channel,
+        hashedCode: await hashCode(code),
+        email,
+      };
+
+      const { id } = await createOtp(otpData);
+
+      const verificationUrl = generateUrl(
+        `${redirectPath}?id=${id}&code=${code}&email=${email}`
+      );
+
+      const templatePath = path.resolve(
+        __dirname,
+        "../emails",
+        "reset-link.html"
+      );
+
+      const html = await loademplate(templatePath, {
+        verificationUrl,
+        channel,
+        name,
+      });
+
+      const mailer = new Mailer();
+
+      await mailer.SendMail(email, "New Code", html);
+
+      res.json({
+        message: "Verification link sent successfully",
+      });
+    } catch (error) {
+      const errMap: Record<string, StatusCodes> = {
+        USER_NOT_FOUND_ERROR: StatusCodes.NOT_FOUND,
+      };
+      next(
+        createRequestError(
+          (error as Error).message || "User not found",
+          (error as Error).name,
+          errMap[(error as Error).name]
         )
       );
     }

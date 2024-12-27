@@ -63,3 +63,11 @@ export const updateById = async (
 ) => {
   await User.findByIdAndUpdate(id, { update });
 };
+
+export const updateByEmail = async (
+  email: string,
+  update: Partial<UpdateQuery<IUserBase>>,
+  { User = UserModel } = {}
+) => {
+  await User.findOneAndUpdate({ email }, { update });
+};
