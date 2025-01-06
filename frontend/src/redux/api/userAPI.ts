@@ -32,10 +32,13 @@ export const userAPI = createApi({
     register: builder.mutation<MessageResponse, User>({
       query: (user) => ({ url: `register`, method: "POST", body: user }),
     }),
+    login: builder.mutation<MessageResponse, User>({
+      query: (user) => ({ url: `login`, method: "POST", body: user }),
+    }),
     updateUser: builder.mutation<MessageResponse, { id: string; user: User }>({
       query: ({ id, user }) => ({
-        url: `/users/${id}`,
-        method: "PUT",
+        url: `users/${id}`,
+        method: "PATCH",
         body: user,
       }),
     }),
