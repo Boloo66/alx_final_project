@@ -20,4 +20,9 @@ orderRouter.get(
   orderController.handleGetByOrderId()
 );
 
+orderRouter.delete(
+  "/:id",
+  validateSchema(orderSchema.getOrderParams, "params"),
+  orderController.handleDeleteOrderId()
+);
 export default orderRouter;

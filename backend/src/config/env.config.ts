@@ -22,6 +22,7 @@ const getEnv = (env = process.env) =>
     CLOUDINARY_CLOUD_NAME: z.string(),
     CLOUDINARY_API_KEY: z.string(),
     CLOUDINARY_API_SECRET_KEY: z.string(),
+    STRIPE_SECRET_KEY: z.string(),
   });
 
 export default getEnv;

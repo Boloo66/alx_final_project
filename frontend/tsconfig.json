@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["dom", "esnext"],
+    "allowJs": true, // Allow JavaScript files (optional)
+    "jsx": "react-jsx", // For React 17+ JSX transform
+    "moduleResolution": "node",
+    "strict": true, // Enable strict type-checking options
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    // "types": ["vite/client"],
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
+  "exclude": ["src/assets/*", "dist/**/*"]
+}

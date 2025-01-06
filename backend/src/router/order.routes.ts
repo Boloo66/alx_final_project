@@ -19,4 +19,10 @@ orderRoute.get(
   orderController.handleGetOrdersByUserId()
 );
 
+orderRoute.delete(
+  "/user/:id",
+  validateSchema(orderSchema.getOrderParams, "params"),
+  orderController.handleDeleteOrderId()
+);
+
 export default orderRoute;

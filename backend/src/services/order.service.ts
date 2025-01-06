@@ -5,6 +5,10 @@ import { createServiceError } from "../utils/error.utils";
 
 export const create = async (data: IOrderBase, { Order = OrderModel } = {}) => {
   const order = await Order.create(data);
+  await order.populate({
+    path: "orderItems.product",
+    select: "price name",
+  });
 
   return order.toObject();
 };
@@ -75,14 +79,17 @@ export const findAll = async (
 
 export const deleteOrder = async (
   id: StringOrObjectId,
-
+  userId?: StringOrObjectId,
   { Order = OrderModel } = {}
 ) => {
   const err = createServiceError("Order not found", "ORDER_NOT_FOUND_ERROR");
 
-  const order = await Order.findById(id).orFail(err);
+  const order = await Order.findOne({
+    _id: id,
+    ...(userId && { userId }),
+  }).orFail(err);
 
-  order.updateOne({ deletedAt: new Date() });
+  await order.updateOne({ deletedAt: new Date() });
 
   await order.save();
 };

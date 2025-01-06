@@ -30,7 +30,16 @@ productSchema.pre("find", function (next) {
 });
 
 productSchema.pre("findOne", function (next) {
-  this.where({ deletedAt: { $exists: false } });
+  this.where({
+    $or: [{ deletedAt: { $exists: false } }, { deletedAt: { $eq: null } }],
+  });
+  next();
+});
+
+productSchema.pre("findOneAndUpdate", function (next) {
+  this.where({
+    $or: [{ deletedAt: { $exists: false } }, { deletedAt: { $eq: null } }],
+  });
   next();
 });
 

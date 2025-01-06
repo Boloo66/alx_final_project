@@ -207,3 +207,27 @@ export const handleGetOrdersByUserId =
       );
     }
   };
+
+export const handleDeleteOrderId =
+  ({ deleteOrder = orderService.deleteOrder } = {}) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = req.params.id;
+
+      await deleteOrder(id, req.jwtUser?.id);
+
+      res.sendStatus(StatusCodes.NO_CONTENT);
+    } catch (error) {
+      const errMap: Record<string, StatusCodes> = {
+        ORDER_NOT_FOUND_ERROR: StatusCodes.NOT_FOUND,
+      };
+
+      next(
+        createRequestError(
+          (error as Error).message,
+          (error as Error).name,
+          errMap[(error as Error).name]
+        )
+      );
+    }
+  };

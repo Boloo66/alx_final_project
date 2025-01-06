@@ -52,7 +52,7 @@ let orderSchema = new Schema<IOrderModel>({
 //   const calculatedSubtotal = order.orderItems.reduce((total, item) => {
 //     return (
 //       total +
-//       item.quantity * ((item.productId as Partial<IProductBase>)?.price || 0)
+//       item.quantity * ((item.product as Partial<IProductBase>)?.price || 0)
 //     ); // this should be from the virtual ref product;
 //   }, 0);
 
@@ -61,6 +61,28 @@ let orderSchema = new Schema<IOrderModel>({
 //   order.total = order.subtotal + order.shippingfee - order.discount;
 //   next();
 // });
+
+orderSchema.pre("find", function (next) {
+  this.where({
+    $or: [{ deletedAt: { $exists: false } }, { deletedAt: { $eq: null } }],
+  });
+  next();
+});
+
+orderSchema.pre("findOne", function (next) {
+  this.where({
+    $or: [{ deletedAt: { $exists: false } }, { deletedAt: { $eq: null } }],
+  });
+  next();
+});
+
+orderSchema.pre("findOneAndUpdate", function (next) {
+  this.where({
+    $or: [{ deletedAt: { $exists: false } }, { deletedAt: { $eq: null } }],
+  });
+  next();
+});
+
 orderSchema = mergeWithBaseSchema(orderSchema, true, true);
 
 orderItemsSchema.virtual("product", {

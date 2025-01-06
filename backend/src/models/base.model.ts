@@ -34,7 +34,7 @@ export function mergeWithBaseSchema(
 
   return new Schema(
     {
-      deletedAt: SchemaTypes.Date,
+      deletedAt: { type: SchemaTypes.Date, default: null },
     },
     {
       ...defaultSchemaOptions,
