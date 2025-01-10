@@ -10,6 +10,9 @@ const Menu = () => {
   const { user } = useSelector((state: TRootState) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const orderItems = useSelector(
+    (state: TRootState) => state.cartReducer.orderItems
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("auth");
@@ -56,7 +59,7 @@ const Menu = () => {
             to="/cart"
             className="text-white text-lg hover:text-gray-300 relative flex items-center"
           >
-            <FaShoppingCart className="mr-1" /> Cart (3)
+            <FaShoppingCart className="mr-1" /> Cart({orderItems.length})
           </NavLink>
 
           {user ? (

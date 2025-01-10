@@ -3,13 +3,15 @@ import { userAPI } from "./api/userAPI";
 import userReducer from "./reducer/userReducer";
 import { productAPI } from "./api/productAPI";
 import { adminAPI } from "./api/adminAPI";
+import { cartReducer } from "./reducer/cartReducer";
 
 export const store = configureStore({
   reducer: {
     [userAPI.reducerPath]: userAPI.reducer,
     [adminAPI.reducerPath]: adminAPI.reducer,
-    [productAPI.reducerPath]: productAPI.reducer, // Add this line
+    [productAPI.reducerPath]: productAPI.reducer,
     [userReducer.name]: userReducer.reducer,
+    [cartReducer.name]: cartReducer.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }).concat(

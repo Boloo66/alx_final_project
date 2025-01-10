@@ -42,7 +42,7 @@ export type User = {
 
 export type ICreateProductResponse = {
   status: string;
-  data: { product: IProduct };
+  data: { product: IProduct; message: string };
 };
 
 export interface IGetAProductResponse {
@@ -50,7 +50,27 @@ export interface IGetAProductResponse {
   data: { product: IProduct };
 }
 
+export interface IGetCategoryResponse {
+  status: string;
+  data: { categories: string[] };
+}
+
 export interface IGetAllProductResponse {
   status: string;
   data: { product: IProduct[] };
+  meta: {
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalCount: number;
+    prevPage: number;
+    nextPage: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+  };
 }
+
+export type TCustomError = {
+  status: number;
+  message: string;
+};

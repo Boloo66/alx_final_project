@@ -3,6 +3,7 @@ import {
   ICreateProductResponse,
   IGetAllProductResponse,
   IGetAProductResponse,
+  IGetCategoryResponse,
 } from "../../types/api-types";
 import { IProduct } from "../../types/types";
 
@@ -11,18 +12,17 @@ export const productAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_SERVER}/api/v1`,
     prepareHeaders: (headers, { getState }) => {
-      // Get auth data from localStorage
       const authData = localStorage.getItem("auth");
       const token = authData ? JSON.parse(authData).token : null;
 
       if (token) {
-        // Remove any quotes and set the token
         const cleanToken = token.replace(/^"|"$/g, "");
         headers.set("authorization", `Bearer ${cleanToken}`);
-        console.log("Clean token being sent:", cleanToken); // For debugging
       }
 
       headers.set("Content-Type", "application/json");
+      headers.set("origin", "http://localhost:5173/");
+
       return headers;
     },
   }),
@@ -43,8 +43,22 @@ export const productAPI = createApi({
         return `/admin/products?${params.toString()}`;
       },
     }),
+    searchProducts: builder.query<IGetAllProductResponse, TFetchPostsParams>({
+      query: ({ page = 1, limit = 10, search, category, sort } = {}) => {
+        const params = new URLSearchParams();
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (search) params.append("search", search);
+        if (category) params.append("category", category);
+        if (sort) params.append("sort", sort);
+        return `/admin/products?${params.toString()}`;
+      },
+    }),
     productById: builder.query<IGetAProductResponse, string>({
-      query: (id) => `/products/${id}`,
+      query: (id) => `/admin/products/${id}`,
+    }),
+    getCategory: builder.query<IGetCategoryResponse, null>({
+      query: () => `/admin/products/categories`,
     }),
     newProduct: builder.mutation<ICreateProductResponse, IProduct>({
       query: (formData: IProduct) => ({
@@ -55,9 +69,15 @@ export const productAPI = createApi({
     }),
     updateProduct: builder.mutation<ICreateProductResponse, TUpdateResponse>({
       query: (data: TUpdateResponse) => ({
-        url: `/products/${data.productId}`,
-        method: "PUT",
+        url: `/admin/products/${data.productId}`,
+        method: "PATCH",
         body: data.formData,
+      }),
+    }),
+    deleteProduct: builder.mutation<null, TDeleteResponse>({
+      query: (data: TDeleteResponse) => ({
+        url: `/admin/products/${data.productId}`,
+        method: "DELETE",
       }),
     }),
   }),
@@ -66,13 +86,36 @@ export const productAPI = createApi({
 type TFetchPostsParams = {
   page?: number;
   limit?: number;
+  search?: string;
+  sort?: string;
+  category?: string;
 };
 
-type TUpdateResponse = { productId: string; formData: FormData };
+interface UpdateProductData {
+  name: string;
+  price: number;
+  stock: number;
+  category: string;
+  description: string;
+  images?: string[];
+}
+
+type TUpdateResponse = {
+  productId: string;
+  formData: UpdateProductData;
+};
+
+type TDeleteResponse = {
+  productId: string;
+};
 
 export const {
   useLatestProductsQuery,
   useAllProductsQuery,
   useNewProductMutation,
   useProductByIdQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useGetCategoryQuery,
+  useSearchProductsQuery,
 } = productAPI;

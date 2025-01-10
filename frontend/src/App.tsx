@@ -15,8 +15,9 @@ import UserDashboard from "./pages/user/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminRoute from "./components/routes/AdminRoute";
 import CreateProduct from "./pages/admin/CreateProduct";
-import AdminProduct from "./pages/admin/Products";
+import AdminProduct from "./pages/admin/Product";
 import Login from "./pages/auth/Login";
+import AdminProducts from "./pages/admin/Products";
 
 function App() {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ function App() {
   // Dispatch the appropriate action based on the user's authentication state
   useEffect(() => {
     if (user) {
-      dispatch(userExist({ user, token }));
+      dispatch(userExist({ user }));
     } else {
       dispatch(logout());
     }
@@ -64,7 +65,7 @@ function App() {
         {/* Admin Routes */}
         <Route path="/dashboard" element={<AdminRoute />}>
           <Route path="admin" element={<AdminDashboard />} />
-          <Route path="admin/products" element={<AdminProduct />} />
+          <Route path="admin/products" element={<AdminProducts />} />
           <Route path="admin/createproduct" element={<CreateProduct />} />
           <Route path="admin/product/:id" element={<AdminProduct />} />
         </Route>
@@ -73,7 +74,7 @@ function App() {
         <Route
           path="*"
           element={
-            <div flex justify-center items-center h-screen>
+            <div className="flex justify-center items-center h-screen">
               <h1 className="text-4xl font-bold">404 Not Found</h1>
             </div>
           }
