@@ -1,56 +1,86 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FaShoppingBag, FaShoppingCart, FaUser } from "react-icons/fa";
+import { Menu as AntMenu, Dropdown, Button } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { TRootState } from "../../redux/store";
+import { logout } from "../../redux/reducer/userReducer";
 
 const Menu = () => {
-  return (
-    <nav className="bg-blue-500 p-4 w-full z-10 pb-5">
-      <div className=" container mx-auto flex justify-between items-center">
-        <NavLink to="/" className="text-white text-lg font-semibold uppercase">
-          Home
+  const { user } = useSelector((state: TRootState) => state.userReducer);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const userMenu = (
+    <AntMenu>
+      <AntMenu.Item key="dashboard">
+        <NavLink to={`/dashboard/${user?.role === "admin" ? "admin" : "user"}`}>
+          Dashboard
         </NavLink>
-        <div className="space-x-4 flex items-center">
-          <NavLink to="/shop" className="text-white hover:text-gray-300">
-            <p className="text-xl">Shop</p>
+      </AntMenu.Item>
+      <AntMenu.Item key="orders">
+        <NavLink to="/dashboard/user/orders">Orders</NavLink>
+      </AntMenu.Item>
+      <AntMenu.Divider />
+      <AntMenu.Item key="logout" onClick={handleLogout}>
+        Logout
+      </AntMenu.Item>
+    </AntMenu>
+  );
+
+  return (
+    <nav className="bg-blue-600 p-4 w-full z-10 shadow-md">
+      <div className="container mx-auto flex justify-between items-center">
+        <NavLink
+          to="/"
+          className="text-white text-xl font-bold uppercase flex items-center"
+        >
+          <FaShoppingBag className="mr-2" /> Home
+        </NavLink>
+
+        <div className="flex items-center space-x-6">
+          <NavLink
+            to="/shop"
+            className="text-white text-lg hover:text-gray-300 flex items-center"
+          >
+            <FaShoppingBag className="mr-1" /> Shop
           </NavLink>
-          <div className="relative inline-block pt-2 pr-1">
-            <NavLink
-              to="/cart"
-              className="text-white hover:text-gray-500 relative flex items-center"
-            >
-              <p className="text-xl text-white">Cart (3)</p>
-            </NavLink>
-          </div>
 
           <NavLink
-            to="/dashboard/user"
-            className="text-white hover:text-gray-300 font-semibold uppercase"
+            to="/cart"
+            className="text-white text-lg hover:text-gray-300 relative flex items-center"
           >
-            Dashboard
+            <FaShoppingCart className="mr-1" /> Cart (3)
           </NavLink>
 
-          <NavLink
-            to="/dashboard/user/orders"
-            className="text-white hover:text-gray-300 font-semibold uppercase"
-          >
-            Orders
-          </NavLink>
-          <span className="cursor-pointer text-white hover:text-gray-300">
-            <p className="flex justify-start">Hello John</p>
-            <p className="text-xl">Logout</p>
-          </span>
-
-          <NavLink
-            to="/register"
-            className="text-white hover:text-gray-300 font-semibold uppercase"
-          >
-            Register
-          </NavLink>
-          <NavLink
-            to="/login"
-            className="text-white hover:text-gray-300 font-semibold uppercase"
-          >
-            Login
-          </NavLink>
+          {user ? (
+            <Dropdown overlay={userMenu} placement="bottomRight" arrow>
+              <Button className="flex items-center text-white bg-blue-600 hover:bg-blue-700 border-none">
+                <FaUser className="mr-2" /> Hello {user.name || "User"}
+              </Button>
+            </Dropdown>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <NavLink
+                to="/register"
+                className="text-white hover:text-gray-300 text-lg uppercase"
+              >
+                Register
+              </NavLink>
+              <NavLink
+                to="/login"
+                className="text-white hover:text-gray-300 text-lg uppercase"
+              >
+                Login
+              </NavLink>
+            </div>
+          )}
         </div>
       </div>
     </nav>

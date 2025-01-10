@@ -1,33 +1,50 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserReducerInitialState } from "../../types/reducer-types";
-import { User } from "../../types/types";
+import { UserData } from "../../types/api-types";
 
-interface BackendResponse {
-  user: User;
-  token: string;
+// Define the type for the state
+interface UserState {
+  user: UserData | null; // Make 'user' nullable
+  token: string | null; // Make 'token' nullable
+  isloading: boolean;
 }
 
-const initialState: UserReducerInitialState = {
+// Initial state with nullable user and token
+const initialState: UserState = {
   user: null,
-  loading: true,
   token: null,
+  isloading: true,
 };
 
-export const userReducer = createSlice({
+const userSlice = createSlice({
   name: "userReducer",
   initialState,
   reducers: {
-    userExist: (state, action: PayloadAction<BackendResponse>) => {
-      state.loading = false;
+    // Action to set user and token
+    userExist: (state, action: PayloadAction<{ user: UserData }>) => {
       state.user = action.payload.user;
-      state.token = action.payload.token;
+      state.token = action.payload.user.token;
+      state.isloading = false;
     },
-    userNotExist: (state) => {
-      state.loading = false;
+    // Action to handle login without the token
+    loginSuccess: (
+      state,
+      action: PayloadAction<{ user: UserData; token: string }>
+    ) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token.replace(/^"|"$/g, "");
+      state.isloading = false;
+    },
+    // Action to log out (set user and token to null)
+    logout: (state) => {
       state.user = null;
       state.token = null;
+      state.isloading = false;
     },
   },
 });
 
-export const { userExist, userNotExist } = userReducer.actions;
+// Export actions
+export const { userExist, loginSuccess, logout } = userSlice.actions;
+
+// Export reducer
+export default userSlice;

@@ -3,10 +3,10 @@ import { BackendResponse, LoginResponse } from "../../types/api-types";
 import { User } from "../../types/types";
 import { TRootState } from "../store";
 
-export const userAPI = createApi({
-  reducerPath: "userApi",
+export const adminAPI = createApi({
+  reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_SERVER}/api/v1`,
+    baseUrl: `${import.meta.env.VITE_SERVER}/api/v1/admin`,
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as TRootState;
       const token = state.userReducer.token;
@@ -20,14 +20,14 @@ export const userAPI = createApi({
     },
   }),
   endpoints: (builder) => ({
-    register: builder.mutation<BackendResponse, User>({
+    adminRegister: builder.mutation<BackendResponse, User>({
       query: (user) => ({
         url: `/auth/register`,
         method: "POST",
         body: user,
       }),
     }),
-    login: builder.mutation<LoginResponse, User>({
+    adminLogin: builder.mutation<LoginResponse, User>({
       query: (user) => ({
         url: `/auth/login`,
         method: "POST",
@@ -44,5 +44,8 @@ export const userAPI = createApi({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useUpdateUserMutation } =
-  userAPI;
+export const {
+  useAdminLoginMutation,
+  useAdminRegisterMutation,
+  useUpdateUserMutation,
+} = adminAPI;

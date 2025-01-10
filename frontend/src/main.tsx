@@ -7,9 +7,9 @@ import "./index.css";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <BrowserRouter>
+  <BrowserRouter>
+    <Provider store={store}>
       <App />
-    </BrowserRouter>
-  </Provider>
+    </Provider>
+  </BrowserRouter>
 );
