@@ -91,6 +91,7 @@ export const handleListAllProducts =
             price: product.price,
             category: product.category,
             stock: product.stock,
+            images: product.images,
             // userId: product.user.name,
           })),
         },

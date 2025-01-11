@@ -87,7 +87,7 @@ export const findAll = async (
   const {
     limit = 10,
     page = 1,
-    sortBy = "-updatedAt",
+    //sortBy = "-updatedAt",
     category,
     search,
   } = params;
@@ -109,7 +109,7 @@ export const findAll = async (
   const paginatedProducts = await Product.paginate(query, {
     page,
     limit,
-    sort: sortBy,
+    sort: { createdAt: -1 },
   });
 
   const { docs, ...meta } = paginatedProducts;

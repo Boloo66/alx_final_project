@@ -24,9 +24,9 @@ const uploadOptions = {
   folder: "ecommerce",
   public_id: (req: Request, file: { originalname: string }) => {
     const parsedFile = path.parse(file.originalname);
-    return `${Date.now()}-${parsedFile.name}.${parsedFile.ext}`.trim();
+    return `${Date.now()}-${parsedFile.name}${parsedFile.ext}`.trim();
   },
-  resource_type: "raw",
+  resource_type: "image",
 };
 
 const storage = new CloudinaryStorage({

@@ -4,6 +4,7 @@ export type OrderItem = {
   name?: string;
   price: number;
   quantity: number;
+  stock?: number;
   image?: string;
 };
 
@@ -18,7 +19,7 @@ type ShippingDetails = {
 export type OrderState = {
   loading: boolean;
   subtotal: number;
-  total: number;
+  total: number | string;
   tax: number;
   discount: number;
   shippingfee: number;
@@ -30,7 +31,7 @@ export type OrderState = {
 const initialState: OrderState = {
   loading: false,
   subtotal: 0,
-  total: 0,
+  total: 0.0,
   tax: 0,
   discount: 0,
   shippingfee: 10,
@@ -83,13 +84,35 @@ export const cartReducer = createSlice({
     },
     calculatePrice: (state) => {
       const subtotal = state.orderItems.reduce((acc, item) => {
-        return acc + item!.price * item.quantity;
+        const price = Number(item.price); // Convert price to number
+        const quantity = Number(item.quantity); // Convert quantity to number
+        if (isNaN(price) || isNaN(quantity)) {
+          console.error("Invalid item price or quantity", item);
+          return acc; // Skip invalid items
+        }
+        return acc + price * quantity;
       }, 0);
-      state.subtotal = subtotal;
-      state.shippingfee = state.subtotal > 1000 ? 0 : 200;
-      state.tax = Math.round(state.subtotal) * 0.12;
-      state.total = subtotal + state.tax + state.shippingfee - state.discount;
+
+      state.subtotal = Number(subtotal.toFixed(2)); // Round to 2 decimal places
+
+      // Shipping fee logic
+      state.shippingfee = state.subtotal > 1000 ? 0 : 5;
+
+      // Tax calculation
+      state.tax = Number((state.subtotal * 0.12).toFixed(2)); // Round tax to 2 decimal places
+
+      // Discount validation
+      const discount =
+        isNaN(Number(state.discount)) || state.discount < 0
+          ? 0
+          : Number((state.discount / 100) * state.subtotal);
+
+      // Total price calculation
+      const total = subtotal + state.tax + state.shippingfee - discount;
+
+      state.total = Number(total.toFixed(2)); // Round to 2 decimal places
     },
+
     saveShippingInfo: (state, action: PayloadAction<ShippingDetails>) => {
       console.log("saving shipping info");
       state.shippingDetails = action.payload;

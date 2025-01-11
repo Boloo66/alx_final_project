@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as userService from "../services/user.service";
 import { StatusCodes } from "http-status-codes";
-import { createRequestError } from "../utils/error.utils";
+import { createRequestError, createServiceError } from "../utils/error.utils";
 import { ERole, EUserStatus } from "../interfaces/user.interface";
 import * as hashUtils from "../utils/hash.utils";
 import * as otpUtils from "../utils/otp.utils";
@@ -269,10 +269,23 @@ export const handleAdminLogin =
     try {
       const { email, password } = req.body;
 
+      // Find user by email
       const user = await findByEmail(email);
 
-      ensurePasswordMatch(password, user.password);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
 
+      if (user.role !== ERole.ADMIN)
+        throw createServiceError("Not permitted", "NOT_AUTHORIZED_ERROR");
+
+      // Ensure password matches
+      await ensurePasswordMatch(password, user.password);
+
+      // Prepare JWT payload
       const payload: IJwtPayload = {
         name: user.name,
         email: user.email,
@@ -280,10 +293,18 @@ export const handleAdminLogin =
         role: user.role,
         expiresIn: "24h",
       };
+
+      // Get secret
       const { JWT_ADMIN_SECRET: secret } = getEnv();
+      if (!secret) {
+        throw new Error("JWT_ADMIN_SECRET is not set in environment variables");
+      }
 
-      const token = createToken(payload, { secret });
+      // Create token
+      const token = createToken(payload, secret);
+      console.log(token);
 
+      // Respond with success
       res.json({
         status: "success",
         message: "Logged in successfully",
@@ -296,7 +317,20 @@ export const handleAdminLogin =
           id: user.id,
         },
       });
-    } catch (error) {}
+    } catch (error) {
+      const errMap: Record<string, StatusCodes> = {
+        HASH_MISMATCH_ERROR: StatusCodes.PRECONDITION_FAILED,
+        USER_NOT_FOUND_ERROR: StatusCodes.NOT_FOUND,
+        NOT_AUTHORIZED_ERROR: StatusCodes.FORBIDDEN,
+      };
+      next(
+        createRequestError(
+          (error as Error).message,
+          (error as Error).name,
+          errMap[(error as Error).name] || StatusCodes.INTERNAL_SERVER_ERROR
+        )
+      );
+    }
   };
 
 export const handleUserLogin =
@@ -311,7 +345,14 @@ export const handleUserLogin =
 
       const user = await findByEmail(email);
 
-      ensurePasswordMatch(password, user.password);
+      await ensurePasswordMatch(password, user.password);
+
+      if (user.role === ERole.ADMIN) {
+        return res.status(403).json({
+          status: "error",
+          message: "Admins cannot log in through the user endpoint",
+        });
+      }
 
       const payload: IJwtPayload = {
         name: user.name,
@@ -322,7 +363,7 @@ export const handleUserLogin =
       };
       const { JWT_SECRET: secret } = getEnv();
 
-      const token = createToken(payload, { secret });
+      const token = createToken(payload, secret);
 
       res.json({
         status: "success",

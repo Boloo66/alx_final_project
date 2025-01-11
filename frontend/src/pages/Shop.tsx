@@ -131,8 +131,8 @@ const Shop: React.FC = () => {
         <div className="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
           {productLoading ? (
             <p>Loading products...</p>
-          ) : searchData?.data.product?.length ? (
-            searchData.data.product.map((product: any) => (
+          ) : searchData?.data.product?.length! > 0 ? (
+            searchData?.data.product.map((product: any) => (
               <div
                 key={product.id}
                 className="bg-white p-4 rounded-md shadow-md"
@@ -144,12 +144,15 @@ const Shop: React.FC = () => {
                 />
                 <h3 className="text-lg font-medium mb-2">{product.name}</h3>
                 <p className="text-gray-600">${product.price}</p>
+                <p className="text-gray-600">Stock: {product.stock}</p>
                 <button
                   onClick={() =>
                     addToCartHandler({
                       productId: product.id,
                       price: product.price,
-                      quantity: product.quantity,
+                      quantity: 1,
+                      stock: product.stock,
+                      image: product.images[0],
                     })
                   }
                   className="bg-blue-500 text-white px-3 py-2 rounded-md mt-2"

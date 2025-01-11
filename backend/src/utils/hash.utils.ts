@@ -7,10 +7,13 @@ import { createServiceError } from "./error.utils";
 const { JWT_ADMIN_SECRET, JWT_SECRET } = getEnv();
 export const verifyBearerToken = (
   token: string,
-  { verify = jwt.verify, secret = JWT_SECRET } = {}
+  secret: string,
+  { verify = jwt.verify } = {}
 ) => {
   try {
-    return verify(token, secret, { algorithms: ["HS256"] }) as IJwtPayload;
+    const decoded = verify(token.trim(), secret.trim()) as IJwtPayload;
+
+    return decoded;
   } catch (error) {
     return null;
   }
@@ -18,9 +21,12 @@ export const verifyBearerToken = (
 
 export const signToken = (
   data: IJwtPayload,
-  { sign = jwt.sign, secret = JWT_SECRET } = {}
+  secret: string,
+  { sign = jwt.sign } = {}
 ) => {
-  return sign(data, secret, { expiresIn: data.expiresIn || "6h" });
+  // Clean the secret before signing
+  const cleanSecret = secret.trim();
+  return sign(data, cleanSecret, { expiresIn: data.expiresIn || "6h" });
 };
 
 export const createHash = async (

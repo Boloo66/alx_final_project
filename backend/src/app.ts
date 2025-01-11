@@ -9,6 +9,7 @@ import {
   errorMiddleware,
   notFoundErrorMiddleware,
 } from "./middlewares/error.middleware";
+import path from "path";
 
 dotenv.config({ path: ".env" });
 
@@ -17,17 +18,17 @@ const app = express();
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "authorization"],
   }),
   helmet({
     contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'"],
-        imgSrc: ["'self'"],
-      },
+      //   directives: {
+      //     defaultSrc: ["'self'"],
+      //     scriptSrc: ["'self'"],
+      //     styleSrc: ["'self'"],
+      //     imgSrc: ["'self'"],
+      //   },
     },
     hsts: {
       maxAge: 31536000,
@@ -63,6 +64,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", router);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(notFoundErrorMiddleware);
 app.use(errorMiddleware);

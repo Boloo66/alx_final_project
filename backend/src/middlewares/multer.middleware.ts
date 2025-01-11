@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
   filename(_req, file, callback) {
     if (!file) callback(new Error(`File ${file} not found`), "");
     const filename = path.parse(file.originalname);
-    callback(null, `${filename.name}-${Date.now()}.${filename.ext}`);
+    callback(null, `${Date.now()}.${filename.ext}`);
   },
 });
 
@@ -44,6 +44,6 @@ const fileParser = multer({
   storage,
   fileFilter,
   limits: { fileSize: 1024 * 1024 * 5 }, // 5MB
-}).single("multer-file");
+}).single("image");
 
 export default fileParser;

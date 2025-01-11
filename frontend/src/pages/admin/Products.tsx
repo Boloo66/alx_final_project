@@ -7,7 +7,7 @@ import { TRootState } from "../../redux/store";
 import { useAllProductsQuery } from "../../redux/api/productAPI";
 import { IProduct } from "../../types/types";
 
-const AdminProduct = () => {
+const AdminProducts = () => {
   const { user } = useSelector((state: TRootState) => state.userReducer);
   const { data, isLoading, error } = useAllProductsQuery({});
 
@@ -105,4 +105,4 @@ const AdminProduct = () => {
   );
 };
 
-export default AdminProduct;
+export default AdminProducts;
