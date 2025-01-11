@@ -1,12 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { TRootState } from "../store";
+import { IOrderResponse } from "../../types/types";
 
 export const orderAPI = createApi({
   reducerPath: "orderApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_SERVER}/api/v1`,
     prepareHeaders: (headers, { getState }) => {
-      const authData = localStorage.getItem("auth");
-      const token = authData ? JSON.parse(authData).token : null;
+      const state = getState() as TRootState;
+      const token = state.userReducer.token;
 
       if (token) {
         const cleanToken = token.replace(/^"|"$/g, "");
@@ -28,9 +30,16 @@ export const orderAPI = createApi({
         body: order,
       }),
     }),
-    myOrders: builder.query<OrderResponseData, string>({
+    myOrders: builder.query<IOrderResponse, string | undefined>({
       query: (id) => ({
-        url: `orders?id=${id}`,
+        url: `orders/user/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["orders"],
+    }),
+    adminOrders: builder.query<OrderResponseData, string>({
+      query: (id) => ({
+        url: `/orders?id=${id}`,
         method: "GET",
       }),
       providesTags: ["orders"],
@@ -74,6 +83,8 @@ export interface OrderResponse {
   createdAt?: string;
   updatedAt?: string;
   id?: string;
+  name?: string;
+  image?: string;
 }
 
 interface OrderResponseData {
@@ -83,4 +94,5 @@ interface OrderResponseData {
   };
 }
 
-export const { useCreateOrderMutation, useMyOrdersQuery } = orderAPI;
+export const { useCreateOrderMutation, useMyOrdersQuery, useAdminOrdersQuery } =
+  orderAPI;

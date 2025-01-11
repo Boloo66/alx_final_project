@@ -4,7 +4,6 @@ import { TRootState } from "../redux/store";
 import { useNavigate } from "react-router-dom";
 import { saveShippingInfo } from "../redux/reducer/cartReducer";
 import axios from "axios";
-import { BiArrowBack } from "react-icons/bi";
 
 const Shipping = () => {
   const { total, orderItems } = useSelector(
@@ -49,8 +48,8 @@ const Shipping = () => {
 
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_SERVER}/api/v1/payment`,
-        { amount: total },
+        `${import.meta.env.VITE_SERVER}/api/v1/payments/intent`,
+        { amount: Number(total) },
         {
           headers: {
             "Content-Type": "application/json",
@@ -59,7 +58,9 @@ const Shipping = () => {
         }
       );
 
-      navigate("/dashboard/user/pay", { state: data.clientSecret });
+      navigate("/dashboard/user/pay", {
+        state: { clientSecret: data.data.clientSecret },
+      });
     } catch (error) {
       console.error("Error processing payment:", error);
       alert("Something went wrong. Please try again.");

@@ -6,14 +6,15 @@ import {
   IGetCategoryResponse,
 } from "../../types/api-types";
 import { IProduct } from "../../types/types";
+import { TRootState } from "../store";
 
 export const productAPI = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_SERVER}/api/v1`,
     prepareHeaders: (headers, { getState }) => {
-      const authData = localStorage.getItem("auth");
-      const token = authData ? JSON.parse(authData).token : null;
+      const state = getState() as TRootState;
+      const token = state.userReducer.token;
 
       if (token) {
         const cleanToken = token.replace(/^"|"$/g, "");
@@ -54,11 +55,28 @@ export const productAPI = createApi({
         return `/admin/products?${params.toString()}`;
       },
     }),
+    userSearchProducts: builder.query<
+      IGetAllProductResponse,
+      TFetchPostsParams
+    >({
+      query: ({ page = 1, limit = 10, search, category, sort } = {}) => {
+        const params = new URLSearchParams();
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (search) params.append("search", search);
+        if (category) params.append("category", category);
+        if (sort) params.append("sort", sort);
+        return `/products?${params.toString()}`;
+      },
+    }),
     productById: builder.query<IGetAProductResponse, string>({
       query: (id) => `/admin/products/${id}`,
     }),
     getCategory: builder.query<IGetCategoryResponse, null>({
       query: () => `/admin/products/categories`,
+    }),
+    userGetCategory: builder.query<IGetCategoryResponse, null>({
+      query: () => `/products/categories`,
     }),
     newProduct: builder.mutation<ICreateProductResponse, IProduct>({
       query: (formData: IProduct) => ({
@@ -118,4 +136,6 @@ export const {
   useDeleteProductMutation,
   useGetCategoryQuery,
   useSearchProductsQuery,
+  useUserSearchProductsQuery,
+  useUserGetCategoryQuery,
 } = productAPI;

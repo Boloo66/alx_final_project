@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import { createRequestError } from "../utils/error.utils";
 import { ParsedUrlQuery } from "querystring";
 import { StringOrObjectId } from "../models/base.model";
+import { EOrderStatus } from "../interfaces/order.interface";
 
 export const handleCreate =
   ({
@@ -93,6 +94,7 @@ export const handleGetAllOrders =
               userId: doc.userId,
               shippingDetails: doc.shippingLocation,
               name: doc.user?.name || null,
+              status: doc.status || EOrderStatus.PROCESSING,
             };
           }),
         },
@@ -208,12 +210,42 @@ export const handleGetOrdersByUserId =
     }
   };
 
+export const handleUpdateOrderId =
+  ({ updateOrder = orderService.findByIdAndUpdate } = {}) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = req.params.id;
+      const update = req.body;
+
+      await updateOrder(id, update);
+
+      res.json({
+        status: "success",
+        data: {
+          ...update,
+        },
+      });
+    } catch (error) {
+      const errMap: Record<string, StatusCodes> = {
+        ORDER_NOT_FOUND_ERROR: StatusCodes.NOT_FOUND,
+      };
+
+      next(
+        createRequestError(
+          (error as Error).message,
+          (error as Error).name,
+          errMap[(error as Error).name]
+        )
+      );
+    }
+  };
+
 export const handleDeleteOrderId =
   ({ deleteOrder = orderService.deleteOrder } = {}) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id;
-
+      console.log({ user: req.jwtUser?.id });
       await deleteOrder(id, req.jwtUser?.id);
 
       res.sendStatus(StatusCodes.NO_CONTENT);

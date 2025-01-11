@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { mongoIdSchema } from "../interfaces/model.interface";
+import { EOrderStatus } from "../interfaces/order.interface";
 
 export const createOrderBodySchema = z.object({
   subtotal: z.coerce.number().optional(),
@@ -12,6 +13,8 @@ export const createOrderBodySchema = z.object({
       productId: mongoIdSchema,
       quantity: z.coerce.number().positive().min(1),
       price: z.coerce.number().positive().min(1).optional(),
+      name: z.string().optional(),
+      image: z.string().optional(),
     })
   ),
   shippingLocation: z.object({
@@ -30,4 +33,8 @@ export const getOrderQueryParams = z.object({
 
 export const getOrderParams = z.object({
   id: mongoIdSchema,
+});
+
+export const updateOrderBodySchema = z.object({
+  status: z.nativeEnum(EOrderStatus),
 });

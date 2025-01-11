@@ -1,3 +1,4 @@
+import { UpdateQuery } from "mongoose";
 import { IOrderBase } from "../interfaces/order.interface";
 import { StringOrObjectId } from "../models/base.model";
 import OrderModel from "../models/order.model";
@@ -20,6 +21,23 @@ export const findById = async (
   try {
     const err = createServiceError("Order not found", "ORDER_NOT_FOUND_ERROR");
     const order = await Order.findById(id).orFail(err);
+
+    return order;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const findByIdAndUpdate = async (
+  id: StringOrObjectId,
+  update: UpdateQuery<Partial<IOrderBase>>,
+  { Order = OrderModel } = {}
+) => {
+  try {
+    const err = createServiceError("Order not found", "ORDER_NOT_FOUND_ERROR");
+    const order = await Order.findByIdAndUpdate(id, { $set: update }).orFail(
+      err
+    );
 
     return order;
   } catch (error) {

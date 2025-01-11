@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   useGetCategoryQuery,
   useSearchProductsQuery,
+  useUserGetCategoryQuery,
+  useUserSearchProductsQuery,
 } from "../redux/api/productAPI";
 import { TCustomError } from "../types/api-types";
 import toast from "react-hot-toast";
 import { addToCart, OrderItem } from "../redux/reducer/cartReducer";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { TRootState } from "../redux/store";
 
 const Shop: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -15,6 +18,7 @@ const Shop: React.FC = () => {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const role = useSelector((state: TRootState) => state.userReducer.user?.role);
 
   // Debounce the search input
   useEffect(() => {
@@ -26,23 +30,33 @@ const Shop: React.FC = () => {
     };
   }, [search]);
 
+  // Choose appropriate queries based on role
   const {
     data: categoryRes,
     isLoading: loadingCategories,
-    isError,
-    error,
-  } = useGetCategoryQuery(null);
+    isError: isCategoryError,
+    error: categoryError,
+  } = role === "admin"
+    ? useGetCategoryQuery(null)
+    : useUserGetCategoryQuery(null);
+
   const {
     data: searchData,
     isLoading: productLoading,
     isError: isProductError,
     error: productError,
-  } = useSearchProductsQuery({ search: debouncedSearch, page, category, sort });
+  } = role === "admin"
+    ? useSearchProductsQuery({ search: debouncedSearch, page, category, sort })
+    : useUserSearchProductsQuery({
+        search: debouncedSearch,
+        page,
+        category,
+        sort,
+      });
 
   const dispatch = useDispatch();
 
   const addToCartHandler = (cartItem: OrderItem) => {
-    alert(`Add to cart: ${cartItem.productId}`);
     if (cartItem.quantity < 1) return toast.error("Out of stock");
     dispatch(addToCart(cartItem));
     toast.success("Product added to cart");
@@ -53,8 +67,9 @@ const Shop: React.FC = () => {
     ? page < searchData.meta.totalPages
     : false;
 
-  if (isError) {
-    const err = error as TCustomError;
+  // Handle errors
+  if (isCategoryError) {
+    const err = categoryError as TCustomError;
     toast.error(err.message as string);
   }
   if (isProductError) {
@@ -153,6 +168,7 @@ const Shop: React.FC = () => {
                       quantity: 1,
                       stock: product.stock,
                       image: product.images[0],
+                      name: product.name,
                     })
                   }
                   className="bg-blue-500 text-white px-3 py-2 rounded-md mt-2"

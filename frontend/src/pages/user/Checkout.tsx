@@ -10,18 +10,16 @@ import {
   OrderResponse,
   useCreateOrderMutation,
 } from "../../redux/api/orderAPI";
-import useSelection from "antd/es/table/hooks/useSelection";
 import { useDispatch, useSelector } from "react-redux";
 import { TRootState } from "../../redux/store";
 import { resetCart } from "../../redux/reducer/cartReducer";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { MessageResponse } from "../../types/api-types";
 import toast from "react-hot-toast";
 
-const Stripe = loadStripe(`${import.meta.env.VITE_STRIPE_PKEY}`);
+// Load the Stripe public key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PKEY as string);
 
-const Checkout = () => {
+const CheckoutForm: React.FC = () => {
   const {
     shippingfee,
     orderItems,
@@ -38,64 +36,96 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [isprocessing, setIsProcessing] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [newOrder] = useCreateOrderMutation();
 
-  const [newOrder, { isLoading, isError, error }] = useCreateOrderMutation();
-
-  const handleSubmit = async (e: FormEvent<HTMLInputElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!stripe || !elements) return;
-    setIsProcessing(true);
-
-    const orderData: OrderResponse = {
-      shippingfee,
-      orderItems,
-      subtotal,
-      tax,
-      discount,
-      shippingLocation: shippingDetails,
-      total: Number(total),
-      userId: user?.id,
-    };
-
-    const { paymentIntent, error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: window.location.origin },
-      redirect: "if_required",
-    });
-
-    if (error) {
-      setIsProcessing(false);
-      console.error("Payment failed:", error);
+    if (!stripe || !elements) {
+      toast.error("Stripe is not initialized.");
       return;
     }
-    if (paymentIntent.status === "succeeded") {
-      setIsProcessing(false);
-      const res = await newOrder(orderData);
-      if ("data" in res && res.data) {
-        dispatch(resetCart());
-        console.log(res);
-        //responseToast(res, Navigate, "/dashboard/user/orders");
-        alert("Payment successful! Your order has been placed.");
-        window.location.href = "/orders";
-      } else {
-        const error = res!.error as unknown as FetchBaseQueryError;
-        const errRes = error.data as MessageResponse;
-        toast.error(errRes.message!);
+
+    setIsProcessing(true);
+
+    try {
+      const orderData: OrderResponse = {
+        shippingfee,
+        orderItems,
+        subtotal,
+        tax,
+        discount,
+        shippingLocation: shippingDetails,
+        total: Number(total),
+        userId: user?.id,
+      };
+
+      const { paymentIntent, error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.origin },
+        redirect: "if_required",
+      });
+
+      if (error) {
+        toast.error(`Payment failed: ${error.message}`);
+        setIsProcessing(false);
+        return;
       }
+
+      if (paymentIntent?.status === "succeeded") {
+        const res = await newOrder(orderData);
+
+        if ("data" in res && res.data) {
+          dispatch(resetCart());
+          toast.success("Payment successful! Your order has been placed.");
+          navigate("/dashboard/user/orders");
+        } else {
+          const apiError = res.error as any;
+          toast.error(apiError.data?.message || "Failed to create order.");
+        }
+      }
+    } catch (err) {
+      toast.error("An error occurred during payment.");
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
-  const location = useLocation();
-  const clientSecret: string | undefined = location.state;
-  if (!clientSecret) return <Navigate to={"/shipping"} />;
+
   return (
-    <div>
-      <Elements options={{ clientSecret }} stripe={Stripe}>
-        <Checkout />
-      </Elements>
-    </div>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-lg mx-auto p-4 bg-white shadow-md rounded"
+    >
+      <PaymentElement />
+      <button
+        type="submit"
+        className={`w-full mt-4 p-2 bg-blue-500 text-white rounded ${
+          isProcessing ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        disabled={isProcessing || !stripe || !elements}
+      >
+        {isProcessing ? "Processing..." : "Pay Now"}
+      </button>
+    </form>
+  );
+};
+
+const Checkout: React.FC = () => {
+  const location = useLocation();
+  const clientSecret: string | undefined = location.state?.clientSecret;
+  console.log({ clientSecret });
+
+  if (!clientSecret) {
+    toast.error("Missing client secret. Redirecting...");
+    return <Navigate to="/dashboard/user/shipping" />;
+  }
+
+  return (
+    <Elements options={{ clientSecret }} stripe={stripePromise}>
+      <CheckoutForm />
+    </Elements>
   );
 };
 

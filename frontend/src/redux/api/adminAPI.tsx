@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { BackendResponse, LoginResponse } from "../../types/api-types";
-import { User } from "../../types/types";
+import { IOrderResponse, User } from "../../types/types";
 import { TRootState } from "../store";
 
 export const adminAPI = createApi({
@@ -36,9 +36,40 @@ export const adminAPI = createApi({
     }),
     updateUser: builder.mutation<BackendResponse, { id: string; user: User }>({
       query: ({ id, user }) => ({
-        url: `users/${id}`,
+        url: `/users/${id}`,
         method: "PATCH",
         body: user,
+      }),
+    }),
+    myAdminOrders: builder.query<
+      IOrderResponse,
+      { page?: number; limit?: number }
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => {
+        const queryString = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        }).toString();
+
+        return {
+          url: `/orders?${queryString}`,
+        };
+      },
+    }),
+    updateOrder: builder.mutation<
+      UpdateResponse,
+      { id: string; data: { status: string } }
+    >({
+      query: (i) => ({
+        url: `/orders/${i.id}`,
+        method: "PATCH",
+        body: i.data,
+      }),
+    }),
+    deleteOrder: builder.mutation<UpdateResponse, { id: string }>({
+      query: (i) => ({
+        url: `/orders/${i.id}`,
+        method: "DELETE",
       }),
     }),
   }),
@@ -48,4 +79,14 @@ export const {
   useAdminLoginMutation,
   useAdminRegisterMutation,
   useUpdateUserMutation,
+  useMyAdminOrdersQuery,
+  useUpdateOrderMutation,
+  useDeleteOrderMutation,
 } = adminAPI;
+
+export type UpdateResponse = {
+  status: string;
+  data: {
+    status: string;
+  };
+};

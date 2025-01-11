@@ -20,6 +20,14 @@ orderRouter.get(
   orderController.handleGetByOrderId()
 );
 
+orderRouter.patch(
+  "/:id",
+  validateSchema(orderSchema.getOrderParams, "params"),
+  validateSchema(orderSchema.updateOrderBodySchema, "body"),
+
+  orderController.handleUpdateOrderId()
+);
+
 orderRouter.delete(
   "/:id",
   validateSchema(orderSchema.getOrderParams, "params"),

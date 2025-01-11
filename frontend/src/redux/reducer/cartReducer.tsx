@@ -117,7 +117,7 @@ export const cartReducer = createSlice({
       console.log("saving shipping info");
       state.shippingDetails = action.payload;
     },
-    resetCart: () => initialState,
+    resetCart: (state) => initialState,
   },
 });
 

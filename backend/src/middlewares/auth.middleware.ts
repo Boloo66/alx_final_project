@@ -17,10 +17,6 @@ export const isAuthenticatedAdmin =
     try {
       const { authorization } = req.headers;
 
-      // Debug logging
-      console.log("Raw Authorization Header:", authorization);
-      console.log("JWT_ADMIN_SECRET:", secret);
-
       if (!authorization || !authorization.startsWith("Bearer ")) {
         throw createServiceError(
           "Missing authorization",
@@ -30,12 +26,11 @@ export const isAuthenticatedAdmin =
 
       const token = authorization.trim().split(" ")[1].trim();
       const decodedToken = decodeToken(token, secret);
-      console.log(decodedToken);
       if (!decodedToken || decodedToken.role !== ERole.ADMIN) {
         throw createServiceError("Not Authorized", "INVALID_TOKEN_ERROR");
       }
 
-      req.jwtUser = {
+      req.jwtAdmin = {
         id: decodedToken.id,
         email: decodedToken.email,
         name: decodedToken.name,

@@ -23,6 +23,8 @@ const orderItemsSchema = new Schema<IOrderItem>(
     productId: { type: Schema.Types.ObjectId, required: true, ref: "Product" },
     quantity: { type: Number, required: true },
     price: { type: Number, required: false, default: null },
+    name: { type: String, required: false },
+    image: { type: String, required: false },
   },
   { versionKey: false, _id: false, id: false, timestamps: false }
 );

@@ -20,6 +20,8 @@ export interface IOrderItem {
   productId: StringOrObjectId;
   quantity: number;
   price?: number;
+  name?: string;
+  image?: string;
   product?: IProductBase;
 }
 

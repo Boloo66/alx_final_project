@@ -35,12 +35,14 @@ const Login = () => {
 
       if (res.status === "success") {
         toast.success(res.message);
-        dispatch(userExist({ user: res.data }));
+        dispatch(userExist({ user: { ...res.data, id: res.data.id } }));
         const userData = {
           user: {
             name: res.data.name,
             email: res.data.email,
             role: res.data.role,
+            token: res.data.token,
+            id: res.data.id,
           },
           token: res.data.token,
         };

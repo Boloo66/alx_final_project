@@ -21,6 +21,8 @@ import AdminProducts from "./pages/admin/Products";
 import Shipping from "./pages/Shipping";
 import Checkout from "./pages/user/Checkout";
 import Order from "./pages/user/Order";
+import Transaction from "./pages/admin/Transaction";
+import OrderManagementPage from "./pages/admin/OrderManagement";
 
 function App() {
   const dispatch = useDispatch();
@@ -73,7 +75,13 @@ function App() {
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/products" element={<AdminProducts />} />
           <Route path="admin/createproduct" element={<CreateProduct />} />
+          <Route path="admin/orders" element={<Transaction />} />
+
           <Route path="admin/product/:id" element={<AdminProduct />} />
+          <Route
+            path="admin/transaction/:id"
+            element={<OrderManagementPage />}
+          />
         </Route>
 
         {/* 404 Route */}
