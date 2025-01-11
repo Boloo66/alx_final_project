@@ -18,6 +18,9 @@ import CreateProduct from "./pages/admin/CreateProduct";
 import AdminProduct from "./pages/admin/Product";
 import Login from "./pages/auth/Login";
 import AdminProducts from "./pages/admin/Products";
+import Shipping from "./pages/Shipping";
+import Checkout from "./pages/user/Checkout";
+import Order from "./pages/user/Order";
 
 function App() {
   const dispatch = useDispatch();
@@ -60,6 +63,9 @@ function App() {
         {/* Private Routes */}
         <Route path="/dashboard" element={<PrivateRoutes />}>
           <Route path="user" element={<UserDashboard />} />
+          <Route path="user/shipping" element={<Shipping />} />
+          <Route path="user/pay" element={<Checkout />} />
+          <Route path="user/orders" element={<Order />} />
         </Route>
 
         {/* Admin Routes */}

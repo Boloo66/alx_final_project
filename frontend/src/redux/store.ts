@@ -4,6 +4,7 @@ import userReducer from "./reducer/userReducer";
 import { productAPI } from "./api/productAPI";
 import { adminAPI } from "./api/adminAPI";
 import { cartReducer } from "./reducer/cartReducer";
+import { orderAPI } from "./api/orderAPI";
 
 export const store = configureStore({
   reducer: {
@@ -12,12 +13,14 @@ export const store = configureStore({
     [productAPI.reducerPath]: productAPI.reducer,
     [userReducer.name]: userReducer.reducer,
     [cartReducer.name]: cartReducer.reducer,
+    [orderAPI.reducerPath]: orderAPI.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }).concat(
       userAPI.middleware,
       productAPI.middleware,
-      adminAPI.middleware
+      adminAPI.middleware,
+      orderAPI.middleware
     ),
 });
 

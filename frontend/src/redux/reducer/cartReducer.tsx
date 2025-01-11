@@ -9,10 +9,10 @@ export type OrderItem = {
 };
 
 type ShippingDetails = {
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
   country: string;
 };
 

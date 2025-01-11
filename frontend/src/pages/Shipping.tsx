@@ -4,6 +4,7 @@ import { TRootState } from "../redux/store";
 import { useNavigate } from "react-router-dom";
 import { saveShippingInfo } from "../redux/reducer/cartReducer";
 import axios from "axios";
+import { BiArrowBack } from "react-icons/bi";
 
 const Shipping = () => {
   const { total, orderItems } = useSelector(
