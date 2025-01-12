@@ -20,7 +20,7 @@ const UserMenu = () => {
 
         <li>
           <NavLink
-            to="/dashboard/user/history"
+            to="/dashboard/user/orders"
             className="block py-2 px-4 transition duration-300 ease-in-out hover:bg-gray-100"
           >
             <span className="font-bold">Order History</span>

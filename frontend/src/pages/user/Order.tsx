@@ -52,7 +52,6 @@ const Order = () => {
             <thead>
               <tr className="bg-blue-600 text-white">
                 <th className="px-6 py-3 text-left">Order ID</th>
-                <th className="px-6 py-3 text-left">Status</th>
                 <th className="px-6 py-3 text-left">Product Name</th>
                 <th className="px-6 py-3 text-left">Quantity</th>
                 <th className="px-6 py-3 text-left">Price</th>
@@ -62,7 +61,6 @@ const Order = () => {
               {data.data.orders.map((order) => (
                 <tr key={order.id} className="border-b hover:bg-blue-100">
                   <td className="px-6 py-4">{order.id}</td>
-                  <td className="px-6 py-4">{order.status}</td>
 
                   <td className="px-6 py-4">
                     {order.orderItems.map((item) => (

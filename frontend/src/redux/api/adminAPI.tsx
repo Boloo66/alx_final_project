@@ -19,6 +19,7 @@ export const adminAPI = createApi({
       return headers;
     },
   }),
+  tagTypes: ["orders", "users"],
   endpoints: (builder) => ({
     adminRegister: builder.mutation<BackendResponse, User>({
       query: (user) => ({
@@ -65,12 +66,14 @@ export const adminAPI = createApi({
         method: "PATCH",
         body: i.data,
       }),
+      invalidatesTags: ["orders"],
     }),
     deleteOrder: builder.mutation<UpdateResponse, { id: string }>({
       query: (i) => ({
         url: `/orders/${i.id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["orders"],
     }),
   }),
 });

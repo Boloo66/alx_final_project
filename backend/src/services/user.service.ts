@@ -69,5 +69,5 @@ export const updateByEmail = async (
   update: Partial<UpdateQuery<IUserBase>>,
   { User = UserModel } = {}
 ) => {
-  await User.findOneAndUpdate({ email }, { update });
+  await User.findOneAndUpdate({ email }, { $set: update });
 };

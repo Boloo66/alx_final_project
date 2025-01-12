@@ -66,7 +66,7 @@ const AdminProducts = () => {
                   <tr key={product.id} className="border-b">
                     <td className="py-2 px-4 border-r border-b border-black">
                       <img
-                        src={`${import.meta.env.VITE_SERVER}/uploads/${product.images[0].split("/")[-1]}`}
+                        src={`${product.images[0]}`}
                         alt=""
                         className="w-12 h-12 object-cover rounded-md"
                       />

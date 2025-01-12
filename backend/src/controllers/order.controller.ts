@@ -185,7 +185,8 @@ export const handleGetOrdersByUserId =
                 return {
                   productId: item.productId,
                   quantity: item.quantity,
-                  price: item["product"]?.price || item.price,
+                  price: item.price,
+                  name: item.name,
                 };
               }),
               userId: doc.userId,

@@ -23,6 +23,8 @@ import Checkout from "./pages/user/Checkout";
 import Order from "./pages/user/Order";
 import Transaction from "./pages/admin/Transaction";
 import OrderManagementPage from "./pages/admin/OrderManagement";
+import RegistrationConfirmed from "./pages/auth/ConfirmReg";
+import ProfilePage from "./pages/user/Profile";
 
 function App() {
   const dispatch = useDispatch();
@@ -61,6 +63,10 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route
+          path="/confirm-registration"
+          element={<RegistrationConfirmed />}
+        />
 
         {/* Private Routes */}
         <Route path="/dashboard" element={<PrivateRoutes />}>
@@ -68,6 +74,7 @@ function App() {
           <Route path="user/shipping" element={<Shipping />} />
           <Route path="user/pay" element={<Checkout />} />
           <Route path="user/orders" element={<Order />} />
+          <Route path="user/profile" element={<ProfilePage />} />
         </Route>
 
         {/* Admin Routes */}

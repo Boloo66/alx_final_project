@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 
 const Transaction = () => {
   const { data, isError, error, isLoading } = useMyAdminOrdersQuery({});
-
+  console.log(data);
   // Function to extract the error message safely
   const getErrorMessage = (error: unknown): string => {
     if (error && typeof error === "object" && "data" in error) {

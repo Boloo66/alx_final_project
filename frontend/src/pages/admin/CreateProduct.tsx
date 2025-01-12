@@ -45,10 +45,10 @@ const CreateProduct = () => {
     try {
       // Step 1: Upload the image
       const imageFormData = new FormData();
-      imageFormData.append("image", image);
+      imageFormData.append("cloudinary-file", image);
 
       const imageUploadResponse = await fetch(
-        `${import.meta.env.VITE_SERVER}/api/v1/media/upload`,
+        `${import.meta.env.VITE_SERVER}/api/v1/media/cloudinary-upload`,
         {
           method: "POST",
           body: imageFormData,
@@ -67,7 +67,7 @@ const CreateProduct = () => {
         throw new Error(imageData.message || "Image upload failed");
       }
 
-      const imagePath = imageData.data.filename;
+      const imagePath = imageData.data.path;
       console.log(imagePath);
 
       // Step 2: Send product data to the backend

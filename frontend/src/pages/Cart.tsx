@@ -116,7 +116,7 @@ const Cart = () => {
             <div className="flex justify-between mb-4">
               <p className="text-gray-600">Discount</p>
               <p className="font-medium text-gray-800">
-                -${(discount / 100) * subtotal || 0}
+                -${Math.round((discount / 100) * subtotal) || 0}
               </p>
             </div>
             <hr className="my-4" />
@@ -125,21 +125,7 @@ const Cart = () => {
               <p className="text-lg font-semibold text-gray-800">Total</p>
               <div>
                 <p className="text-2xl font-bold text-blue-600">${total}</p>
-                <p
-                  className="text-smTypeError: Cannot read properties of undefined (reading 'toFixed')
-    at Cart (Cart.tsx:118:29)
-    at renderWithHooks (react-dom.development.js:15486:18)
-    at updateFunctionComponent (react-dom.development.js:19617:20)
-    at beginWork (react-dom.development.js:21640:16)
-    at beginWork$1 (react-dom.development.js:27465:14)
-    at performUnitOfWork (react-dom.development.js:26596:12)
-    at workLoopSync (react-dom.development.js:26505:5)
-    at renderRootSync (react-dom.development.js:26473:7)
-    at recoverFromConcurrentError (react-dom.development.js:25889:20)
-    at performSyncWorkOnRoot (react-dom.development.js:26135:20) text-gray-500"
-                >
-                  Including VAT
-                </p>
+                <p className="text-sm text-gray-500">Including VAT</p>
               </div>
             </div>
 

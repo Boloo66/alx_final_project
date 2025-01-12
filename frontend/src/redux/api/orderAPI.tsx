@@ -29,13 +29,13 @@ export const orderAPI = createApi({
         method: "POST",
         body: order,
       }),
+      invalidatesTags: ["orders"],
     }),
     myOrders: builder.query<IOrderResponse, string | undefined>({
       query: (id) => ({
         url: `orders/user/${id}`,
         method: "GET",
       }),
-      providesTags: ["orders"],
     }),
     adminOrders: builder.query<OrderResponseData, string>({
       query: (id) => ({

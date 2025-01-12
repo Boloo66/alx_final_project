@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import * as userService from "../services/user.service";
 import { StatusCodes } from "http-status-codes";
 import { createRequestError, createServiceError } from "../utils/error.utils";
@@ -48,9 +48,10 @@ export const handleRegisterUser =
       };
 
       const { id: tokenId } = await createOtp(otpData);
+      const emailEncoded = encodeURIComponent(email);
 
       const verificationUrl = generateUrl(
-        `${redirectPath}?id=${tokenId}?code=${otp}?email=${email}`
+        `${redirectPath}?id=${tokenId}&code=${otp}&email=${emailEncoded}`
       );
 
       //import html and send
@@ -169,18 +170,13 @@ export const handleCompleteReg =
     try {
       const id = req.query.id as StringOrObjectId;
 
-      console.log(id);
-
       const { status, email } = await findOtpById(id, EOtpChannel.REGISTRATION);
-      console.log(status);
 
       verifyStatus(status, EOtpStatus.CONFIRMED);
 
       await markOtpAsUsed(id, EOtpStatus.USED);
 
-      await updateUser(email, {
-        $set: { status: EUserStatus.ACTIVE },
-      });
+      await updateUser(email, { status: EUserStatus.ACTIVE });
 
       res.json({
         status: "success",
@@ -493,12 +489,13 @@ export const handleRequestNewCode =
         message: "Verification link sent successfully",
       });
     } catch (error) {
+      console.log(error);
       const errMap: Record<string, StatusCodes> = {
         USER_NOT_FOUND_ERROR: StatusCodes.NOT_FOUND,
       };
       next(
         createRequestError(
-          (error as Error).message || "User not found",
+          (error as Error).message || "Cannot generate link",
           (error as Error).name,
           errMap[(error as Error).name]
         )

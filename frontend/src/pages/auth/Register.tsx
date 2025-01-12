@@ -18,7 +18,7 @@ const Register = () => {
     // Append redirectPath to the form data
     const formDataWithRedirect = {
       ...formData,
-      redirectPath: "/admin/auth/verify", // Include dummy path in the request
+      redirectPath: "/confirm-registration",
     };
 
     try {

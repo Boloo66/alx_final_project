@@ -3,60 +3,9 @@ import { ChevronLeft, ChevronRight, Star, ShoppingCart } from "lucide-react";
 import { IProduct } from "../types/types";
 import { assets } from "../assets/frontend_assets/assets";
 import {
-  useAllProductsQuery,
-  useGetCategoryQuery,
+  useUserSearchProductsQuery,
+  useUserGetCategoryQuery,
 } from "../redux/api/productAPI";
-
-const products = [
-  {
-    id: 1,
-    name: "Premium Wireless Headphones",
-    price: 299.99,
-    rating: 4.8,
-    image: "/api/placeholder/300/300",
-    category: "Electronics",
-  },
-  {
-    id: 2,
-    name: "Smart Fitness Watch",
-    price: 199.99,
-    rating: 4.6,
-    image: "/api/placeholder/300/300",
-    category: "Wearables",
-  },
-  {
-    id: 3,
-    name: "Ultra HD Camera",
-    price: 799.99,
-    rating: 4.9,
-    image: "/api/placeholder/300/300",
-    category: "Photography",
-  },
-  {
-    id: 4,
-    name: "Wireless Gaming Mouse",
-    price: 79.99,
-    rating: 4.7,
-    image: "/api/placeholder/300/300",
-    category: "Gaming",
-  },
-  {
-    id: 5,
-    name: "Mechanical Keyboard",
-    price: 149.99,
-    rating: 4.5,
-    image: "/api/placeholder/300/300",
-    category: "Peripherals",
-  },
-  {
-    id: 6,
-    name: "Noise-Canceling Earbuds",
-    price: 249.99,
-    rating: 4.8,
-    image: "/api/placeholder/300/300",
-    category: "Audio",
-  },
-];
 
 const ProductCard = ({ product }: { product: IProduct }) => {
   return (
@@ -89,7 +38,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 };
 
 const ProductSlider = () => {
-  const { data: productsData } = useAllProductsQuery({});
+  const { data: productsData } = useUserSearchProductsQuery({});
   const products = productsData?.data?.product || [];
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -145,11 +94,30 @@ const ProductSlider = () => {
 };
 
 const Home = () => {
-  const { data: productsData } = useAllProductsQuery({});
-  const { data: categoriesData } = useGetCategoryQuery(null);
+  const {
+    data: productsData,
+    isLoading: isProductsLoading,
+    error: productsError,
+  } = useUserSearchProductsQuery({});
 
-  const categories = categoriesData?.data.categories || [];
+  const {
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
+  } = useUserGetCategoryQuery(null);
+
+  // Extract categories and products safely
+  const categories = categoriesData?.data?.categories || [];
   const products = productsData?.data?.product || [];
+
+  // Handle loading and error states
+  if (isProductsLoading || isCategoriesLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (productsError || categoriesError) {
+    return <div>Error fetching products</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -270,9 +238,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Product Slider Section */}
-      <ProductSlider />
 
       {/* Categories Section */}
       <section className="py-16 bg-white">

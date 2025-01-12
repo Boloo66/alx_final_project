@@ -16,6 +16,7 @@ userAuthRoutes.post(
   "/login",
   validateSchema(authValidationSchema.loginSchema, "body"),
   isActiveUser(),
+  // @ts-expect-error: Allow next to accept a custom error object
   authController.handleUserLogin()
 );
 
@@ -59,7 +60,7 @@ userAuthRoutes.post(
 userAuthRoutes.post(
   "/request-reset-code",
   validateSchema(authValidationSchema.requestNewCodeSchema, "body"),
-  authController.handleRequestNewCode(true)
+  authController.handleRequestNewCode(false)
 );
 
 export default userAuthRoutes;

@@ -6,8 +6,6 @@ import { isAuthenticatedUser } from "../middlewares/auth.middleware";
 
 const productRoute = Router();
 
-productRoute.use(isAuthenticatedUser());
-
 productRoute.get(
   "/",
   validateSchema(productSchema.getProductQuery, "query"),
